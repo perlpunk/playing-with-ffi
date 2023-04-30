@@ -30,7 +30,6 @@ Foo::yaml_stream_start_event_initialize($stream_start, 0);
 diag $stream_start->as_string;
 
 my $ret = Foo::yaml_scalar_event_initialize($new_event, "Anc", "Tag", "lala", -1, 1, 0, $style);
-warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$ret], ['ret']);
 diag $new_event->as_string;
 diag $new_event->data->scalar->style;
 diag $new_event->data->scalar->value;
@@ -38,6 +37,9 @@ is $new_event->data->scalar->value, "lala", "value";
 is $new_event->data->scalar->style, $style, "scalar style";
 is $new_event->start_mark, "Mark(0):[L:0 C:0]", "start_mark";
 
+my $sstyle = Foo::YamlSequenceStyle::YAML_FLOW_SEQUENCE_STYLE;
+$ret = Foo::yaml_sequence_start_event_initialize($new_event, "Anc", "Tag", 1, $sstyle);
+is $new_event->data->sequence_start->style, $sstyle, "sequence style";
+diag $new_event->as_string;
 
-pass '\o/';
 done_testing;

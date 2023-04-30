@@ -232,4 +232,41 @@ yaml_stream_start_event_initialize(yaml_event_t *event,
     return 1;
 }
 
+YAML_DECLARE(int)
+yaml_sequence_start_event_initialize(yaml_event_t *event,
+        const yaml_char_t *anchor, const yaml_char_t *tag, int implicit,
+        yaml_sequence_style_t style)
+{
+    fprintf(stderr, "============= yaml_sequence_start_event_initialize\n");
+    yaml_mark_t mark = { 0, 0, 0 };
+    yaml_char_t *anchor_copy = NULL;
+    yaml_char_t *tag_copy = NULL;
+
+    assert(event);      /* Non-NULL event object is expected. */
+
+    if (anchor) {
+        if (!yaml_check_utf8(anchor, strlen((char *)anchor))) goto error;
+        anchor_copy = yaml_strdup(anchor);
+        if (!anchor_copy) goto error;
+    }
+
+    if (tag) {
+        if (!yaml_check_utf8(tag, strlen((char *)tag))) goto error;
+        tag_copy = yaml_strdup(tag);
+        if (!tag_copy) goto error;
+    }
+
+    SEQUENCE_START_EVENT_INIT(*event, anchor_copy, tag_copy,
+            implicit, style, mark, mark);
+
+    fprintf(stderr, "new style: %d\n", event->data.sequence_start.style);
+    return 1;
+
+error:
+    yaml_free(anchor_copy);
+    yaml_free(tag_copy);
+
+    return 0;
+}
+
 

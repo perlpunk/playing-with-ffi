@@ -36,6 +36,16 @@ package Foo::YamlScalarStyle {
     { rev => 'int', prefix => 'YAML_', package => 'Foo::YamlScalarStyle' }
     );
 }
+
+package Foo::YamlSequenceStyle {
+    FFI::C->enum( yaml_sequence_style_t => [qw/
+        ANY_SEQUENCE_STYLE
+        BLOCK_SEQUENCE_STYLE
+        FLOW_SEQUENCE_STYLE
+    /],
+    { rev => 'int', prefix => 'YAML_', package => 'Foo::YamlSequenceStyle' }
+    );
+}
 package Foo::YamlEncoding {
     FFI::C->enum( yaml_encoding_t => [qw/
     YAML_ANY_ENCODING
@@ -61,11 +71,18 @@ package YAML::LibYAML::API::FFI::Scalar {
     ]);
 }
 
+package YAML::LibYAML::API::FFI::SequenceStart {
+    FFI::C->struct( YAML_SequenceStart => [
+        style => 'yaml_scalar_style_t',
+    ]);
+}
+
 package YAML::LibYAML::API::FFI::EventData {
     FFI::C->union( yaml_event_data_t => [
         stream_start => 'int',
         document_end => 'int',
         scalar => 'YAML_Scalar',
+        sequence_start => 'YAML_SequenceStart',
     ]);
 }
 
@@ -104,6 +121,11 @@ package Event {
             warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$anchor], ['anchor']);
             $str .= sprintf "=VAL >%s< (%d) pi: %d", $value, $length, $plain_implicit;
         }
+        elsif ($self->event_type == YAML::LibYAML::API::FFI::event_type::YAML_SEQUENCE_START_EVENT()) {
+            my $style = $self->data->sequence_start->style;
+            warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$style], ['style']);
+            $str .= "+SEQ";
+        }
         return $str;
     }
 }
@@ -113,6 +135,11 @@ $ffi->attach( yaml_scalar_event_initialize => [qw/
 /] => 'int' );
 $ffi->attach( yaml_stream_start_event_initialize => [qw/
     yaml_event_t yaml_encoding_t
+/] => 'int' );
+
+$ffi->attach( yaml_sequence_start_event_initialize => [qw/
+    yaml_event_t string string int
+    yaml_sequence_style_t
 /] => 'int' );
 
 1;
