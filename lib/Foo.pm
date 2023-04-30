@@ -108,7 +108,7 @@ package Event {
     ]);
     sub as_string {
         my ($self) = @_;
-        my $str = sprintf "Event(%d) ",
+        my $str = sprintf "##### Event(%d) ",
             $self->event_type;
         if ($self->event_type == YAML::LibYAML::API::FFI::event_type::YAML_STREAM_START_EVENT()) {
             $str .= "+STR";
@@ -118,12 +118,10 @@ package Event {
             my $anchor = $self->data->scalar->anchor;
             my $length = $self->data->scalar->length;
             my $plain_implicit = $self->data->scalar->plain_implicit;
-            warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$anchor], ['anchor']);
-            $str .= sprintf "=VAL >%s< (%d) pi: %d", $value, $length, $plain_implicit;
+            $str .= sprintf "=VAL >%s< (%d) plain_implicit: %d", $value, $length, $plain_implicit;
         }
         elsif ($self->event_type == YAML::LibYAML::API::FFI::event_type::YAML_SEQUENCE_START_EVENT()) {
             my $style = $self->data->sequence_start->style;
-            warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$style], ['style']);
             $str .= "+SEQ";
         }
         return $str;
