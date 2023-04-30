@@ -84,13 +84,8 @@ typedef struct {
 } yaml_event_t;
 
 */
-int
-lala(yaml_event_t *event) {
-    fprintf(stderr, "!!!!!!!!!!!!!!\n");
-//    fprintf(stderr, "type: %d\n", event->event_type);
-    return 42;
-}
 
+/*
 int
 yaml_scalar_event_initialize(
     yaml_event_t *event, const yaml_char_t *anchor, const yaml_char_t *tag,
@@ -111,25 +106,84 @@ yaml_scalar_event_initialize(
     fprintf(stderr, "new style: %d\n", event->data.scalar.style);
     return 23;
 }
+*/
 
-/*
-int
-yaml_scalar_event_initialize2(yaml_event_t *event,
+YAML_DECLARE(void *)
+yaml_malloc(size_t size)
+{
+    return malloc(size ? size : 1);
+}
+
+
+YAML_DECLARE(yaml_char_t *)
+yaml_strdup(const yaml_char_t *str)
+{
+    if (!str)
+        return NULL;
+
+    return (yaml_char_t *)strdup((char *)str);
+}
+
+static int
+yaml_check_utf8(const yaml_char_t *start, size_t length)
+{
+    const yaml_char_t *end = start+length;
+    const yaml_char_t *pointer = start;
+
+    while (pointer < end) {
+        unsigned char octet;
+        unsigned int width;
+        unsigned int value;
+        size_t k;
+
+        octet = pointer[0];
+        width = (octet & 0x80) == 0x00 ? 1 :
+                (octet & 0xE0) == 0xC0 ? 2 :
+                (octet & 0xF0) == 0xE0 ? 3 :
+                (octet & 0xF8) == 0xF0 ? 4 : 0;
+        value = (octet & 0x80) == 0x00 ? octet & 0x7F :
+                (octet & 0xE0) == 0xC0 ? octet & 0x1F :
+                (octet & 0xF0) == 0xE0 ? octet & 0x0F :
+                (octet & 0xF8) == 0xF0 ? octet & 0x07 : 0;
+        if (!width) return 0;
+        if (pointer+width > end) return 0;
+        for (k = 1; k < width; k ++) {
+            octet = pointer[k];
+            if ((octet & 0xC0) != 0x80) return 0;
+            value = (value << 6) + (octet & 0x3F);
+        }
+        if (!((width == 1) ||
+            (width == 2 && value >= 0x80) ||
+            (width == 3 && value >= 0x800) ||
+            (width == 4 && value >= 0x10000))) return 0;
+
+        pointer += width;
+    }
+
+    return 1;
+}
+
+
+YAML_DECLARE(int)
+yaml_scalar_event_initialize(yaml_event_t *event,
         const yaml_char_t *anchor, const yaml_char_t *tag,
         const yaml_char_t *value, int length,
         int plain_implicit, int quoted_implicit,
         yaml_scalar_style_t style)
 {
-//    yaml_mark_t mark = { 0, 0, 0 };
+    fprintf(stderr, "============= yaml_scalar_event_initialize\n");
+    fprintf(stderr, "old style: %d\n", event->data.scalar.style);
+    fprintf(stderr, "value: >%s<\n", value);
+    yaml_mark_t mark = { 0, 0, 0 };
     yaml_char_t *anchor_copy = NULL;
     yaml_char_t *tag_copy = NULL;
     yaml_char_t *value_copy = NULL;
 
-    assert(event);
-    assert(value);
+    assert(event);      /* Non-NULL event object is expected. */
+    assert(value);      /* Non-NULL anchor is expected. */
 
     if (anchor) {
-//        if (!yaml_check_utf8(anchor, strlen((char *)anchor))) goto error;
+        if (!yaml_check_utf8(anchor, strlen((char *)anchor))) goto error;
         anchor_copy = yaml_strdup(anchor);
         if (!anchor_copy) goto error;
     }
@@ -151,7 +205,10 @@ yaml_scalar_event_initialize2(yaml_event_t *event,
     value_copy[length] = '\0';
 
     SCALAR_EVENT_INIT(*event, anchor_copy, tag_copy, value_copy, length,
-            plain_implicit, quoted_implicit, style );
+            plain_implicit, quoted_implicit, style, mark, mark);
+    fprintf(stderr, "new style: %d\n", event->data.scalar.style);
+    fprintf(stderr, "new value: >%s<\n", event->data.scalar.value);
+    fprintf(stderr, "plain_implicit: >%d<\n", event->data.scalar.plain_implicit);
 
     return 1;
 
@@ -162,5 +219,17 @@ error:
 
     return 0;
 }
-*/
+
+yaml_stream_start_event_initialize(yaml_event_t *event,
+        yaml_encoding_t encoding)
+{
+    yaml_mark_t mark = { 0, 0, 0 };
+
+    assert(event);  /* Non-NULL event object is expected. */
+
+    STREAM_START_EVENT_INIT(*event, encoding, mark, mark);
+
+    return 1;
+}
+
 
