@@ -64,20 +64,22 @@ yaml_check_utf8(const yaml_char_t *start, size_t length)
 YAML_DECLARE(int)
 yaml_scalar_event_initialize(yaml_event_t *event,
         const yaml_char_t *anchor, const yaml_char_t *tag,
-        const yaml_char_t *value, int length,
+        const yaml_char_t *val, int length,
         int plain_implicit, int quoted_implicit,
         yaml_scalar_style_t style)
 {
     fprintf(stderr, "============= yaml_scalar_event_initialize\n");
-    fprintf(stderr, "old style: %d\n", event->data.scalar.style);
-    fprintf(stderr, "value: >%s<\n", value);
+//    fprintf(stderr, "old style: %d\n", event->data.scalar.style);
+    fprintf(stderr, "-> val: >%s<\n", val);
+    fprintf(stderr, "-> tag: >%s<\n", tag);
+    fprintf(stderr, "-> anchor: >%s<\n", anchor);
     yaml_mark_t mark = { 0, 0, 0 };
     yaml_char_t *anchor_copy = NULL;
     yaml_char_t *tag_copy = NULL;
-    yaml_char_t *value_copy = NULL;
+    yaml_char_t *val_copy = NULL;
 
     assert(event);      /* Non-NULL event object is expected. */
-    assert(value);      /* Non-NULL anchor is expected. */
+    assert(val);      /* Non-NULL anchor is expected. */
 
     if (anchor) {
         if (!yaml_check_utf8(anchor, strlen((char *)anchor))) goto error;
@@ -92,27 +94,31 @@ yaml_scalar_event_initialize(yaml_event_t *event,
     }
 
     if (length < 0) {
-        length = strlen((char *)value);
+        length = strlen((char *)val);
     }
 
-    if (!yaml_check_utf8(value, length)) goto error;
-    value_copy = YAML_MALLOC(length+1);
-    if (!value_copy) goto error;
-    memcpy(value_copy, value, length);
-    value_copy[length] = '\0';
+    if (!yaml_check_utf8(val, length)) goto error;
+    val_copy = YAML_MALLOC(length+1);
+    if (!val_copy) goto error;
+    memcpy(val_copy, val, length);
+    val_copy[length] = '\0';
 
-    SCALAR_EVENT_INIT(*event, anchor_copy, tag_copy, value_copy, length,
+//    SCALAR_EVENT_INIT(*event, anchor_copy, tag_copy, val_copy, length,
+//            plain_implicit, quoted_implicit, style, mark, mark);
+    SCALAR_EVENT_INIT2(*event, anchor_copy, tag_copy, length,
             plain_implicit, quoted_implicit, style, mark, mark);
-    fprintf(stderr, "new style: %d\n", event->data.scalar.style);
-    fprintf(stderr, "new value: >%s<\n", event->data.scalar.value);
-    fprintf(stderr, "plain_implicit: >%d<\n", event->data.scalar.plain_implicit);
+//    fprintf(stderr, "new style: %d\n", event->data.scalar.style);
+//    fprintf(stderr, "new val: >%s<\n", event->data.scalar.val);
+//    fprintf(stderr, "new tag: >%s<\n", event->data.scalar.tag);
+//    fprintf(stderr, "new anchor: >%s<\n", event->data.scalar.anchor);
+//    fprintf(stderr, "plain_implicit: >%d<\n", event->data.scalar.plain_implicit);
 
     return 1;
 
 error:
     yaml_free(anchor_copy);
     yaml_free(tag_copy);
-    yaml_free(value_copy);
+    yaml_free(val_copy);
 
     return 0;
 }
@@ -123,7 +129,7 @@ yaml_stream_start_event_initialize(yaml_event_t *event,
     fprintf(stderr, "============= yaml_stream_start_event_initialize\n");
     yaml_mark_t mark = { 0, 0, 0 };
 
-    assert(event);  /* Non-NULL event object is expected. */
+    assert(event);
 
     STREAM_START_EVENT_INIT(*event, encoding, mark, mark);
 
@@ -132,13 +138,17 @@ yaml_stream_start_event_initialize(yaml_event_t *event,
 
 YAML_DECLARE(int)
 yaml_sequence_start_event_initialize(yaml_event_t *event,
-        const yaml_char_t *anchor, const yaml_char_t *tag, int implicit,
+        const yaml_char_t *anchor, const yaml_char_t *tag, const yaml_char_t *val, int implicit,
         yaml_sequence_style_t style)
 {
+    int length = -1;
     fprintf(stderr, "============= yaml_sequence_start_event_initialize\n");
     yaml_mark_t mark = { 0, 0, 0 };
     yaml_char_t *anchor_copy = NULL;
     yaml_char_t *tag_copy = NULL;
+    yaml_char_t *val_copy = NULL;
+    fprintf(stderr, "-> anchor: %s\n", anchor);
+    fprintf(stderr, "-> tag: %s\n", tag);
 
     assert(event);      /* Non-NULL event object is expected. */
 
@@ -154,10 +164,22 @@ yaml_sequence_start_event_initialize(yaml_event_t *event,
         if (!tag_copy) goto error;
     }
 
-    SEQUENCE_START_EVENT_INIT(*event, anchor_copy, tag_copy,
+    if (length < 0) {
+        length = strlen((char *)val);
+    }
+    if (!yaml_check_utf8(val, length)) goto error;
+    val_copy = YAML_MALLOC(length+1);
+    if (!val_copy) goto error;
+    memcpy(val_copy, val, length);
+    val_copy[length] = '\0';
+
+    SEQUENCE_START_EVENT_INIT2(*event, anchor_copy, tag_copy, val_copy,
             implicit, style, mark, mark);
 
+
     fprintf(stderr, "new style: %d\n", event->data.sequence_start.style);
+    fprintf(stderr, "new anchor: %s\n", event->data.sequence_start.anchor);
+    fprintf(stderr, "new tag: %s\n", event->data.sequence_start.tag);
     return 1;
 
 error:
@@ -166,5 +188,6 @@ error:
 
     return 0;
 }
+
 
 
