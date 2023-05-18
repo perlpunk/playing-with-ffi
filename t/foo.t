@@ -15,6 +15,16 @@ subtest scalar => sub {
     is $event->data->scalar->style, $style, "style";
 };
 
+subtest sequence => sub {
+    my $event = Event->new;
+    my $style = Foo::YamlSequenceStyle::YAML_FLOW_SEQUENCE_STYLE;
+    my $ret = Foo::yaml_sequence_start_event_initialize($event, "Anc", "Tag", 1, $style);
+    is $event->data->sequence_start->anchor_str, 'Anc', 'anchor';
+    is $event->data->sequence_start->tag_str, 'Tag', 'tag';
+    is $event->data->sequence_start->implicit, 1, "quoted_implicit";
+    is $event->data->sequence_start->style, $style, "style";
+};
+
 diag "=================== END ===============";
 
 done_testing;

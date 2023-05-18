@@ -37,6 +37,16 @@ package Foo::YamlScalarStyle {
     );
 }
 
+package Foo::YamlSequenceStyle {
+    FFI::C->enum( yaml_sequence_style_t => [qw/
+        ANY_SEQUENCE_STYLE
+        BLOCK_SEQUENCE_STYLE
+        FLOW_SEQUENCE_STYLE
+    /],
+    { rev => 'int', prefix => 'YAML_', package => 'Foo::YamlSequenceStyle' }
+    );
+}
+
 package Foo::Scalar {
     FFI::C->struct( YAML_Scalar => [
         anchor => 'opaque',
@@ -52,9 +62,21 @@ package Foo::Scalar {
     sub value_str ($self) { $ffi->cast('opaque', 'string', $self->value) }
 }
 
+package Foo::SequenceStart {
+    FFI::C->struct( YAML_SequenceStart => [
+        anchor => 'opaque',
+        tag => 'opaque',
+        implicit => 'int',
+        style => 'yaml_sequence_style_t',
+    ]);
+    sub anchor_str ($self) { $ffi->cast('opaque', 'string', $self->anchor) }
+    sub tag_str ($self) { $ffi->cast('opaque', 'string', $self->tag) }
+}
+
 package Foo::EventData {
     FFI::C->union( yaml_event_data_t => [
         scalar => 'YAML_Scalar',
+        sequence_start => 'YAML_SequenceStart',
     ]);
 }
 
@@ -83,6 +105,9 @@ package Event {
 
 $ffi->attach( yaml_scalar_event_initialize => [qw/
     yaml_event_t string string string int int int yaml_scalar_style_t
+/] => 'int' );
+$ffi->attach( yaml_sequence_start_event_initialize => [qw/
+    yaml_event_t string string int yaml_scalar_style_t
 /] => 'int' );
 
 1;
