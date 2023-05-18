@@ -199,6 +199,7 @@ package Foo::Event {
         return $str;
     }
 
+    $ffi->attach( [ event_DESTROY => 'DESTROY' ] => [ 'yaml_event_t' ] => 'void'   );
 }
 
 package Foo::ParserStates {
@@ -381,6 +382,7 @@ package Foo::Parser {
 #     yaml_document_t *document;
 
     ]);
+    $ffi->attach( [ parser_DESTROY => 'DESTROY' ] => [ 'yaml_parser_t' ] => 'void'   );
 }
 
 $ffi->attach( yaml_stream_start_event_initialize => [qw/
@@ -412,5 +414,7 @@ $ffi->attach( yaml_event_delete => [qw/
 $ffi->attach( yaml_parser_delete => [qw/
     yaml_parser_t
 /] => 'void' );
+
+
 
 1;

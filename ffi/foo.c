@@ -1396,4 +1396,15 @@ yaml_document_append_mapping_pair(yaml_document_t *document,
     return 1;
 }
 
+void
+parser_DESTROY(yaml_parser_t *parser) {
+//    fprintf(stderr, "////////////////////////// DESTROY parser\n");
+    yaml_parser_delete(parser);
+}
+
+void
+event_DESTROY(yaml_event_t *event) {
+//    fprintf(stderr, "////////////////////////// DESTROY event\n");
+    yaml_event_delete(event);
+}
 

@@ -6,7 +6,8 @@ use Data::Dumper;
 subtest parse => sub {
     my $parser = Foo::Parser->new;
     my $ok = Foo::yaml_parser_initialize($parser);
-    is $parser->error, 0, "error";
+    is $ok, 1, "initialize";
+    is $parser->error, 0, "error" or bail_out("Parser not correctly initialized");
     my $input = "input";
     is $parser->read_handler, undef, "read_handler";
     Foo::yaml_parser_set_input_string($parser, $input, length($input));
@@ -20,12 +21,12 @@ subtest parse => sub {
         my $str = $event->as_string;
         diag "Event: $str";
         push @$events, "$event";
-        Foo::yaml_event_delete($event);
         last unless $ok;
         last if $type == Foo::event_type::YAML_STREAM_END_EVENT;
     }
-    Foo::yaml_parser_delete($parser);
     is scalar @$events, 5, "event number";
+    undef $parser;
+    diag "end";
 };
 
 done_testing;
