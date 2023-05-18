@@ -37,39 +37,11 @@ package Foo::YamlScalarStyle {
     );
 }
 
-package Foo::YamlSequenceStyle {
-    FFI::C->enum( yaml_sequence_style_t => [qw/
-        ANY_SEQUENCE_STYLE
-        BLOCK_SEQUENCE_STYLE
-        FLOW_SEQUENCE_STYLE
-    /],
-    { rev => 'int', prefix => 'YAML_', package => 'Foo::YamlSequenceStyle' }
-    );
-}
-package Foo::Scalar {
-    FFI::C->struct( YAML_Scalar => [
-        anchor => 'opaque',
-        tag => 'opaque',
-        val => 'string(100)',
-#        val => 'opaque',        # <----------------- will make the test die very early
-        length => 'int',
-        plain_implicit => 'int',
-        quoted_implicit => 'int',
-        style => 'yaml_scalar_style_t',
-    ]);
-    sub anchor_str ($self) { $ffi->cast('opaque', 'string', $self->anchor) }
-    sub tag_str ($self) { $ffi->cast('opaque', 'string', $self->tag) }
-    sub val_str ($self) { $ffi->cast('opaque', 'string', $self->val) }
-}
-
-package Foo::SequenceStart {
-    FFI::C->struct( YAML_SequenceStart => [
+package Foo::Bar {
+    FFI::C->struct( YAML_Bar => [
         anchor => 'opaque',
         tag => 'opaque',
         val => 'opaque',
-        length => 'size_t',
-        implicit => 'int',
-        style => 'yaml_sequence_style_t',
     ]);
     sub anchor_str ($self) { $ffi->cast('opaque', 'string', $self->anchor) }
     sub tag_str ($self) { $ffi->cast('opaque', 'string', $self->tag) }
@@ -78,8 +50,7 @@ package Foo::SequenceStart {
 
 package Foo::EventData {
     FFI::C->union( yaml_event_data_t => [
-        scalar => 'YAML_Scalar',
-        sequence_start => 'YAML_SequenceStart',
+        bar => 'YAML_Bar',
     ]);
 }
 
@@ -104,35 +75,10 @@ package Event {
         start_mark => 'yaml_mark_t',
         end_mark => 'yaml_mark_t',
     ]);
-    sub as_string {
-        my ($self) = @_;
-        my $str = sprintf "##### Event(%d) ",
-            $self->event_type;
-        if ($self->event_type == Foo::event_type::YAML_SCALAR_EVENT()) {
-            my $val = $self->data->scalar->val;
-            my $anchor = $self->data->scalar->anchor;
-            my $length = $self->data->scalar->length;
-            my $plain_implicit = $self->data->scalar->plain_implicit;
-            $str .= sprintf "=VAL >%s< (%d) plain_implicit: %d", $val, $length, $plain_implicit;
-        }
-        elsif ($self->event_type == Foo::event_type::YAML_SEQUENCE_START_EVENT()) {
-            my $style = $self->data->sequence_start->style;
-            $str .= "+SEQ";
-            if ($style == Foo::YamlSequenceStyle::YAML_FLOW_SEQUENCE_STYLE()) {
-                $str .= " []";
-            }
-        }
-        return $str;
-    }
 }
 
 $ffi->attach( yaml_scalar_event_initialize => [qw/
     yaml_event_t string string string int int int yaml_scalar_style_t
-/] => 'int' );
-
-$ffi->attach( yaml_sequence_start_event_initialize => [qw/
-    yaml_event_t string string string int
-    yaml_sequence_style_t
 /] => 'int' );
 
 1;
