@@ -6,11 +6,13 @@ WriteMakefile(
     NAME     => 'Foo',
     DISTNAME => 'Foo',
     VERSION  => '1.00',
-    # ...
+    PREREQ_PM => {
+        'FFI::C' => 0,
+        'FFI::Platypus' => 0,
+    },
   )
 );
 
-sub MY::postamble
-{
-  $fbmm->mm_postamble;
+sub MY::postamble {
+    $fbmm->mm_postamble;
 }
