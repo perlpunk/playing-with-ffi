@@ -130,7 +130,7 @@ yaml_sequence_start_event_initialize(yaml_event_t *event,
         const yaml_char_t *anchor, const yaml_char_t *tag, const yaml_char_t *val, int implicit,
         yaml_sequence_style_t style)
 {
-    size_t foo = -1;
+    size_t foo = 99;
     int length = -1;
     fprintf(stderr, "============= yaml_sequence_start_event_initialize\n");
     yaml_mark_t mark = { 0, 0, 0 };
@@ -168,7 +168,7 @@ yaml_sequence_start_event_initialize(yaml_event_t *event,
     fprintf(stderr, "LENGTH: %d\n", length);
 
     SEQUENCE_START_EVENT_INIT2(*event, anchor_copy, tag_copy, val_copy,
-            length, implicit, style, mark, mark);
+            length, foo, implicit, style, mark, mark);
 
 
     fprintf(stderr, "new style: %d\n", event->data.sequence_start.style);

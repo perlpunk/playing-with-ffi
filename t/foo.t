@@ -19,6 +19,7 @@ subtest sequence_start => sub {
     is $event->data->sequence_start->tag_str, 'TAG', 'tag';
     is $event->data->sequence_start->val_str, 'dummy', 'val';
     is $event->data->sequence_start->length, 5, 'length';
+    is $event->data->sequence_start->foo, 99, 'foo';
     is $event->data->sequence_start->implicit, 1, 'implicit';
     is $event->data->sequence_start->style, $sstyle, "sequence style";
 };
