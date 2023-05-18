@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "yaml_private.h"
 #include "yaml.h"
+#include <stdint.h>
+
 
 YAML_DECLARE(void *)
 yaml_malloc(size_t size)
@@ -105,7 +107,7 @@ yaml_scalar_event_initialize(yaml_event_t *event,
 
 //    SCALAR_EVENT_INIT(*event, anchor_copy, tag_copy, val_copy, length,
 //            plain_implicit, quoted_implicit, style, mark, mark);
-    SCALAR_EVENT_INIT2(*event, anchor_copy, tag_copy, length,
+    SCALAR_EVENT_INIT2(*event, anchor_copy, tag_copy, val_copy, length,
             plain_implicit, quoted_implicit, style, mark, mark);
 //    fprintf(stderr, "new style: %d\n", event->data.scalar.style);
 //    fprintf(stderr, "new val: >%s<\n", event->data.scalar.val);
@@ -123,24 +125,12 @@ error:
     return 0;
 }
 
-yaml_stream_start_event_initialize(yaml_event_t *event,
-        yaml_encoding_t encoding)
-{
-    fprintf(stderr, "============= yaml_stream_start_event_initialize\n");
-    yaml_mark_t mark = { 0, 0, 0 };
-
-    assert(event);
-
-    STREAM_START_EVENT_INIT(*event, encoding, mark, mark);
-
-    return 1;
-}
-
 YAML_DECLARE(int)
 yaml_sequence_start_event_initialize(yaml_event_t *event,
         const yaml_char_t *anchor, const yaml_char_t *tag, const yaml_char_t *val, int implicit,
         yaml_sequence_style_t style)
 {
+    size_t foo = -1;
     int length = -1;
     fprintf(stderr, "============= yaml_sequence_start_event_initialize\n");
     yaml_mark_t mark = { 0, 0, 0 };
@@ -167,14 +157,18 @@ yaml_sequence_start_event_initialize(yaml_event_t *event,
     if (length < 0) {
         length = strlen((char *)val);
     }
+    if (foo < 0) {
+        foo = strlen((char *)val);
+    }
     if (!yaml_check_utf8(val, length)) goto error;
     val_copy = YAML_MALLOC(length+1);
     if (!val_copy) goto error;
     memcpy(val_copy, val, length);
     val_copy[length] = '\0';
+    fprintf(stderr, "LENGTH: %d\n", length);
 
     SEQUENCE_START_EVENT_INIT2(*event, anchor_copy, tag_copy, val_copy,
-            implicit, style, mark, mark);
+            length, implicit, style, mark, mark);
 
 
     fprintf(stderr, "new style: %d\n", event->data.sequence_start.style);

@@ -46,17 +46,6 @@ package Foo::YamlSequenceStyle {
     { rev => 'int', prefix => 'YAML_', package => 'Foo::YamlSequenceStyle' }
     );
 }
-package Foo::YamlEncoding {
-    FFI::C->enum( yaml_encoding_t => [qw/
-        ANY_ENCODING
-        UTF8_ENCODING
-        UTF16LE_ENCODING
-        UTF16BE_ENCODING
-    /],
-    { rev => 'int', prefix => 'YAML_', package => 'Foo::YamlEncoding' }
-    );
-}
-
 package Foo::Scalar {
     FFI::C->struct( YAML_Scalar => [
         anchor => 'opaque',
@@ -78,6 +67,7 @@ package Foo::SequenceStart {
         anchor => 'opaque',
         tag => 'opaque',
         val => 'opaque',
+        length => 'int',
         implicit => 'int',
         style => 'yaml_sequence_style_t',
     ]);
@@ -86,16 +76,8 @@ package Foo::SequenceStart {
     sub val_str ($self) { $ffi->cast('opaque', 'string', $self->val) }
 }
 
-package Foo::StreamStart {
-    FFI::C->struct( YAML_StreamStart => [
-        encoding => 'yaml_encoding_t',
-    ]);
-}
-
 package Foo::EventData {
     FFI::C->union( yaml_event_data_t => [
-        stream_start => 'YAML_StreamStart',
-        document_end => 'int',
         scalar => 'YAML_Scalar',
         sequence_start => 'YAML_SequenceStart',
     ]);
@@ -126,10 +108,7 @@ package Event {
         my ($self) = @_;
         my $str = sprintf "##### Event(%d) ",
             $self->event_type;
-        if ($self->event_type == Foo::event_type::YAML_STREAM_START_EVENT()) {
-            $str .= "+STR";
-        }
-        elsif ($self->event_type == Foo::event_type::YAML_SCALAR_EVENT()) {
+        if ($self->event_type == Foo::event_type::YAML_SCALAR_EVENT()) {
             my $val = $self->data->scalar->val;
             my $anchor = $self->data->scalar->anchor;
             my $length = $self->data->scalar->length;
@@ -149,9 +128,6 @@ package Event {
 
 $ffi->attach( yaml_scalar_event_initialize => [qw/
     yaml_event_t string string string int int int yaml_scalar_style_t
-/] => 'int' );
-$ffi->attach( yaml_stream_start_event_initialize => [qw/
-    yaml_event_t yaml_encoding_t
 /] => 'int' );
 
 $ffi->attach( yaml_sequence_start_event_initialize => [qw/

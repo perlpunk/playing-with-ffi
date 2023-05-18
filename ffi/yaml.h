@@ -49,34 +49,6 @@ yaml_get_version(int *major, int *minor, int *patch);
 
 typedef unsigned char yaml_char_t;
 
-typedef struct yaml_version_directive_s {
-    int major;
-    int minor;
-} yaml_version_directive_t;
-
-typedef struct yaml_tag_directive_s {
-    yaml_char_t *handle;
-    yaml_char_t *prefix;
-} yaml_tag_directive_t;
-
-typedef enum yaml_encoding_e {
-    YAML_ANY_ENCODING,
-    YAML_UTF8_ENCODING,
-    YAML_UTF16LE_ENCODING,
-    YAML_UTF16BE_ENCODING
-} yaml_encoding_t;
-
-
-typedef enum yaml_error_type_e {
-    YAML_NO_ERROR,
-    YAML_MEMORY_ERROR,
-    YAML_READER_ERROR,
-    YAML_SCANNER_ERROR,
-    YAML_PARSER_ERROR,
-    YAML_COMPOSER_ERROR,
-    YAML_WRITER_ERROR,
-    YAML_EMITTER_ERROR
-} yaml_error_type_t;
 
 typedef struct yaml_mark_s {
     size_t index;
@@ -99,13 +71,6 @@ typedef enum yaml_sequence_style_e {
     YAML_FLOW_SEQUENCE_STYLE
 } yaml_sequence_style_t;
 
-typedef enum yaml_mapping_style_e {
-    YAML_ANY_MAPPING_STYLE,
-    YAML_BLOCK_MAPPING_STYLE,
-    YAML_FLOW_MAPPING_STYLE
-} yaml_mapping_style_t;
-
-
 typedef enum yaml_event_type_e {
     YAML_NO_EVENT,
     YAML_STREAM_START_EVENT,
@@ -126,33 +91,10 @@ typedef struct yaml_event_s {
 
     union {
         struct {
-            yaml_encoding_t encoding;
-        } stream_start;
-
-        struct {
-            yaml_version_directive_t *version_directive;
-
-            struct {
-                yaml_tag_directive_t *start;
-                yaml_tag_directive_t *end;
-            } tag_directives;
-
-            int implicit;
-        } document_start;
-
-        struct {
-            int implicit;
-        } document_end;
-
-        struct {
-            yaml_char_t *anchor;
-        } alias;
-
-        struct {
             yaml_char_t *anchor;
             yaml_char_t *tag;
 //            yaml_char_t *val;
-            size_t length;
+            int length;
             int plain_implicit;
             int quoted_implicit;
             yaml_scalar_style_t style;
@@ -162,16 +104,10 @@ typedef struct yaml_event_s {
             yaml_char_t *anchor;
             yaml_char_t *tag;
             yaml_char_t *val;
+            int length;
             int implicit;
             yaml_sequence_style_t style;
         } sequence_start;
-
-        struct {
-            yaml_char_t *anchor;
-            yaml_char_t *tag;
-            int implicit;
-            yaml_mapping_style_t style;
-        } mapping_start;
 
     } data;
 
@@ -179,71 +115,6 @@ typedef struct yaml_event_s {
     yaml_mark_t end_mark;
 
 } yaml_event_t;
-
-/**
- * Create the STREAM-START event.
- *
- * @param[out]      event       An empty event object.
- * @param[in]       encoding    The stream encoding.
- *
- * @returns @c 1 if the function succeeded, @c 0 on error.
- */
-
-YAML_DECLARE(int)
-yaml_stream_start_event_initialize(yaml_event_t *event,
-        yaml_encoding_t encoding);
-
-/**
- * Create a SCALAR event.
- *
- * The @a style argument may be ignored by the emitter.
- *
- * Either the @a tag attribute or one of the @a plain_implicit and
- * @a quoted_implicit flags must be set.
- *
- * @param[out]      event           An empty event object.
- * @param[in]       anchor          The scalar anchor or @c NULL.
- * @param[in]       tag             The scalar tag or @c NULL.
- * @param[in]       value           The scalar value.
- * @param[in]       length          The length of the scalar value.
- * @param[in]       plain_implicit  If the tag may be omitted for the plain
- *                                  style.
- * @param[in]       quoted_implicit If the tag may be omitted for any
- *                                  non-plain style.
- * @param[in]       style           The scalar style.
- *
- * @returns @c 1 if the function succeeded, @c 0 on error.
- */
-
-YAML_DECLARE(int)
-yaml_scalar_event_initialize(yaml_event_t *event,
-        const yaml_char_t *anchor, const yaml_char_t *tag,
-        const yaml_char_t *value, int length,
-        int plain_implicit, int quoted_implicit,
-        yaml_scalar_style_t style);
-
-/**
- * Create a SEQUENCE-START event.
- *
- * The @a style argument may be ignored by the emitter.
- *
- * Either the @a tag attribute or the @a implicit flag must be set.
- *
- * @param[out]      event       An empty event object.
- * @param[in]       anchor      The sequence anchor or @c NULL.
- * @param[in]       tag         The sequence tag or @c NULL.
- * @param[in]       implicit    If the tag may be omitted.
- * @param[in]       style       The sequence style.
- *
- * @returns @c 1 if the function succeeded, @c 0 on error.
- */
-
-/*
-YAML_DECLARE(int)
-yaml_sequence_start_event_initialize(yaml_event_t *event,
-        const yaml_char_t *anchor, const yaml_char_t *tag, int implicit,
-        yaml_sequence_style_t style);
-*/
 
 
 /** The tag @c !!null with the only possible value: @c null. */
