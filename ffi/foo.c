@@ -181,6 +181,7 @@ yaml_queue_extend(void **start, void **head, void **tail, void **end)
 YAML_DECLARE(int)
 yaml_parser_initialize(yaml_parser_t *parser)
 {
+    fprintf(stderr, "============== yaml_parser_initialize\n");
     assert(parser);     /* Non-NULL parser object expected. */
 
     memset(parser, 0, sizeof(yaml_parser_t));
