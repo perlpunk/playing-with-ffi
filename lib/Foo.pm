@@ -67,8 +67,7 @@ package Foo::SequenceStart {
         anchor => 'opaque',
         tag => 'opaque',
         val => 'opaque',
-        length => 'int',
-        foo => 'size_t',
+        length => 'size_t',
         implicit => 'int',
         style => 'yaml_sequence_style_t',
     ]);

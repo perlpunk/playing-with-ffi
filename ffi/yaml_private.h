@@ -63,14 +63,13 @@ yaml_strdup(const yaml_char_t *);
      (event).data.sequence_start.implicit = (event_implicit),                   \
      (event).data.sequence_start.style = (event_style))
 
-#define SEQUENCE_START_EVENT_INIT2(event,event_anchor,event_tag,event_val,event_length,                 \
+#define SEQUENCE_START_EVENT_INIT2(event,event_anchor,event_tag,event_val,                 \
         event_foo, event_implicit,event_style,start_mark,end_mark)                         \
     (EVENT_INIT((event),YAML_SEQUENCE_START_EVENT,(start_mark),(end_mark)),     \
      (event).data.sequence_start.anchor = (event_anchor),                       \
      (event).data.sequence_start.tag = (event_tag),                             \
      (event).data.sequence_start.val = (event_val),                             \
-     (event).data.sequence_start.length = (event_length),                               \
-     (event).data.sequence_start.foo = (event_foo),                               \
+     (event).data.sequence_start.length = (event_foo),                               \
      (event).data.sequence_start.implicit = (event_implicit),                   \
      (event).data.sequence_start.style = (event_style))
 

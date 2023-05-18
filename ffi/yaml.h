@@ -104,8 +104,7 @@ typedef struct yaml_event_s {
             yaml_char_t *anchor;
             yaml_char_t *tag;
             yaml_char_t *val;
-            int length;
-            size_t foo;
+            size_t length;
             int implicit;
             yaml_sequence_style_t style;
         } sequence_start;
