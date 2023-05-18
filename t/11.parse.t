@@ -19,7 +19,7 @@ subtest parse => sub {
         my $type = $event->type;
         my $str = $event->as_string;
         diag "Event: $str";
-        push @$events, $event;
+        push @$events, "$event";
         Foo::yaml_event_delete($event);
         last unless $ok;
         last if $type == Foo::event_type::YAML_STREAM_END_EVENT;
