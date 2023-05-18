@@ -9,21 +9,8 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
-/** The public API declaration. */
 
-#if defined(__MINGW32__)
 #   define  YAML_DECLARE(type)  type
-#elif defined(_WIN32)
-#   if defined(YAML_DECLARE_STATIC)
-#       define  YAML_DECLARE(type)  type
-#   elif defined(YAML_DECLARE_EXPORT)
-#       define  YAML_DECLARE(type)  __declspec(dllexport) type
-#   else
-#       define  YAML_DECLARE(type)  __declspec(dllimport) type
-#   endif
-#else
-#   define  YAML_DECLARE(type)  type
-#endif
 
 
 typedef unsigned char yaml_char_t;
@@ -63,8 +50,12 @@ typedef struct yaml_event_s {
         struct {
             yaml_char_t *anchor;
             yaml_char_t *tag;
-            yaml_char_t *val;
-        } bar;
+            yaml_char_t *value;
+            size_t length;
+            int plain_implicit;
+            int quoted_implicit;
+            yaml_scalar_style_t style;
+        } scalar;
     } data;
     yaml_mark_t start_mark;
     yaml_mark_t end_mark;

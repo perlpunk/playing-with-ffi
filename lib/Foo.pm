@@ -6,7 +6,7 @@ use experimental 'signatures';
 use FFI::Platypus 2.00;
 use FFI::C;
 
-my $ffi = FFI::Platypus->new( api => 2 );
+my $ffi = FFI::Platypus->new( api => 1 );
 FFI::C->ffi($ffi);
 
 $ffi->bundle;
@@ -37,20 +37,24 @@ package Foo::YamlScalarStyle {
     );
 }
 
-package Foo::Bar {
-    FFI::C->struct( YAML_Bar => [
+package Foo::Scalar {
+    FFI::C->struct( YAML_Scalar => [
         anchor => 'opaque',
         tag => 'opaque',
-        val => 'opaque',
+        value => 'opaque',
+        length => 'size_t',
+        plain_implicit => 'int',
+        quoted_implicit => 'int',
+        style => 'yaml_scalar_style_t',
     ]);
     sub anchor_str ($self) { $ffi->cast('opaque', 'string', $self->anchor) }
     sub tag_str ($self) { $ffi->cast('opaque', 'string', $self->tag) }
-    sub val_str ($self) { $ffi->cast('opaque', 'string', $self->val) }
+    sub value_str ($self) { $ffi->cast('opaque', 'string', $self->value) }
 }
 
 package Foo::EventData {
     FFI::C->union( yaml_event_data_t => [
-        bar => 'YAML_Bar',
+        scalar => 'YAML_Scalar',
     ]);
 }
 
@@ -58,9 +62,9 @@ package Foo::YamlMark {
     use overload
         '""' => sub { shift->as_string };
     FFI::C->struct( yaml_mark_t => [
-        index => 'int',
-        line =>'int',
-        column => 'int',
+        index => 'size_t',
+        line =>'size_t',
+        column => 'size_t',
     ]);
     sub as_string {
         my ($self) = @_;
