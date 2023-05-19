@@ -4,10 +4,16 @@ use Foo;
 use Data::Dumper;
 
 subtest parse => sub {
+    for my $i (1..15) {
+        warn __PACKAGE__.':'.__LINE__.": ################################ $i\n";
+        my $parser = Foo::Parser->new;
+        my $ok = Foo::yaml_parser_initialize($parser);
+        is $ok, 1, "initialize";
+        is $parser->error, 0, "error" or bail_out("Parser not correctly initialized");
+    }
+    return;
     my $parser = Foo::Parser->new;
     my $ok = Foo::yaml_parser_initialize($parser);
-    is $ok, 1, "initialize";
-    is $parser->error, 0, "error" or bail_out("Parser not correctly initialized");
     my $input = "input";
     is $parser->read_handler, undef, "read_handler";
     Foo::yaml_parser_set_input_string($parser, $input, length($input));

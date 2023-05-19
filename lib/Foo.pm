@@ -209,7 +209,52 @@ package Foo::ParserStates {
         top => 'yaml_parser_state_t',
     ]);
 }
+
+package Foo::TagDirective {
+    FFI::C->struct( yaml_tag_directive_t => [
+        handle => 'opaque',
+        prefix => 'opaque',
+    ]);
+}
+
+package Foo::VersionDirective {
+    FFI::C->struct( yaml_version_directive_t => [
+        major => 'int',
+        minor => 'int',
+    ]);
+}
+
+package Foo::DocumentTagDirectives {
+    FFI::C->struct( document_tag_directives => [
+        start => 'yaml_tag_directive_t',
+        end => 'yaml_tag_directive_t',
+    ]);
+}
+
+package Foo::YamlDocument {
+    $ffi->type( 'opaque' => 'document_nodes' );
+    FFI::C->struct( yaml_document_t => [
+        nodes => 'document_nodes',
+        version_directive => 'yaml_version_directive_t',
+        tag_directives => 'document_tag_directives',
+        start_implicit => 'int',
+        end_implicit => 'int',
+        start_mark => 'yaml_mark_t',
+        end_mark => 'yaml_mark_t',
+    ]);
+}
+
 package Foo::Parser {
+    $ffi->type( 'opaque' => 'yaml_read_handler_t' );
+    $ffi->type( 'opaque' => 'parser_input' );
+    $ffi->type( 'opaque' => 'parser_tokens' );
+    $ffi->type( 'opaque' => 'parser_indents' );
+    $ffi->type( 'opaque' => 'parser_simple_keys' );
+    $ffi->type( 'opaque' => 'parser_states' );
+    $ffi->type( 'opaque' => 'parser_marks' );
+    $ffi->type( 'opaque' => 'parser_tag_directives' );
+    $ffi->type( 'opaque' => 'parser_aliases' );
+
     FFI::C->struct( yaml_parser_t => [
         error => 'yaml_error_type_t',
         problem => 'opaque',
@@ -221,13 +266,13 @@ package Foo::Parser {
 # 
 #      * Reader stuff
 # 
-        read_handler => 'opaque',
+        read_handler => 'yaml_read_handler_t',
 # 
         read_handler_data => 'opaque',
 #     /** A pointer for passing to the read handler. */
 #     void *read_handler_data;
 # 
-        input => 'opaque',
+        input => 'parser_input',
 #     /** Standard (string or file) input data. */
 #     union {
 #         /** String input data. */
@@ -287,7 +332,7 @@ package Foo::Parser {
         stream_end_produced => 'int',
         flow_level => 'int',
 # 
-        tokens => 'opaque',
+        tokens => 'parser_tokens',
 #     /** The tokens queue. */
 #     struct {
 #         /** The beginning of the tokens queue. */
@@ -303,7 +348,7 @@ package Foo::Parser {
         tokens_parsed => 'size_t',
         token_available => 'int',
 # 
-        indents => 'opaque',
+        indents => 'parser_indents',
 #     /** The indentation levels stack. */
 #     struct {
 #         /** The beginning of the stack. */
@@ -317,7 +362,7 @@ package Foo::Parser {
         indent => 'int',
         simple_key_allowed => 'int',
 # 
-        simple_keys => 'opaque',
+        simple_keys => 'parser_simple_keys',
 #     /** The stack of simple keys. */
 #     struct {
 #         /** The beginning of the stack. */
@@ -330,7 +375,7 @@ package Foo::Parser {
 # 
 #      * Parser stuff
 # 
-        states => 'opaque',
+        states => 'parser_states',
 #     struct {
 #         /** The beginning of the stack. */
 #         yaml_parser_state_t *start;
@@ -342,7 +387,7 @@ package Foo::Parser {
 # 
         state => 'yaml_parser_state_t',
 
-        marks => 'opaque',
+        marks => 'parser_marks',
 #     /** The stack of marks. */
 #     struct {
 #         /** The beginning of the stack. */
@@ -353,7 +398,7 @@ package Foo::Parser {
 #         yaml_mark_t *top;
 #     } marks;
 # 
-        tag_directives => 'opaque',
+        tag_directives => 'parser_tag_directives',
 #     /** The list of TAG directives. */
 #     struct {
 #         /** The beginning of the list. */
@@ -366,7 +411,7 @@ package Foo::Parser {
 # 
 #      Dumper stuff
 # 
-        aliases => 'opaque',
+        aliases => 'parser_aliases',
 #     /** The alias data. */
 #     struct {
 #         /** The beginning of the list. */
@@ -377,7 +422,7 @@ package Foo::Parser {
 #         yaml_alias_data_t *top;
 #     } aliases;
 # 
-        document => 'opaque',
+        document => 'yaml_document_t',
 #     /** The currently parsed document. */
 #     yaml_document_t *document;
 

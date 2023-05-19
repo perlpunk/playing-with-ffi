@@ -201,6 +201,7 @@ yaml_parser_initialize(yaml_parser_t *parser)
         goto error;
     if (!STACK_INIT(parser, parser->tag_directives, yaml_tag_directive_t*))
         goto error;
+    fprintf(stderr, "============== yaml_parser_initialize end\n");
 
     return 1;
 
@@ -225,6 +226,7 @@ error:
 YAML_DECLARE(void)
 yaml_parser_delete(yaml_parser_t *parser)
 {
+    fprintf(stderr, "================== yaml_parser_delete\n");
     assert(parser); /* Non-NULL parser object expected. */
 
     BUFFER_DEL(parser, parser->raw_buffer);
@@ -1398,7 +1400,7 @@ yaml_document_append_mapping_pair(yaml_document_t *document,
 
 void
 parser_DESTROY(yaml_parser_t *parser) {
-//    fprintf(stderr, "////////////////////////// DESTROY parser\n");
+    fprintf(stderr, "////////////////////////// DESTROY parser\n");
     yaml_parser_delete(parser);
 }
 
